@@ -6,7 +6,7 @@ async function getData(num) {
     url = 'https://api.wheretheiss.at/v1/satellites/25544/positions?timestamps=';
     timestamp = new Array(num);
     for (i = 0; i < num; i++) {
-        timestamp[i] = Date.now() -3600000 * i;
+        timestamp[i] = Date.now() - 3600000 * i;
     }
     const apiUrl = `${url}${timestamp.join(",")}`;
     const response = await fetch(apiUrl);
@@ -15,19 +15,22 @@ async function getData(num) {
 }
 
 getData(posNum).then(data => data.forEach((element) => positions.push({
-    "longitude": element.longitude, 
-    "latitude": element.latitude, 
+    "longitude": element.longitude,
+    "latitude": element.latitude,
     "timestamp": element.timestamp
-}))).then( () => slider.disabled = false);
+}))).then(() => slider.disabled = false);
 
 
 var scene = new THREE.Scene();
-var renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+var renderer = new THREE.WebGLRenderer({
+    alpha: true,
+    antialias: true
+});
 var camera = new THREE.PerspectiveCamera(
     75,
-    window.innerWidth / window.innerHeight, 
+    window.innerWidth / window.innerHeight,
     0.1,
-    1000 
+    1000
 );
 camera.position.z = 9;
 
@@ -60,7 +63,7 @@ function loadEarth(scene) {
     });
     var earth = new THREE.Mesh(geometry, material);
     earth.position.set(0, 0, 0);
-    earth.rotation.y = - Math.PI / 2;
+    earth.rotation.y = -Math.PI / 2;
     earth.name = 'earth';
     scene.add(earth);
     return scene;
@@ -74,7 +77,7 @@ function loadISS(scene) {
             iss = gltf.scene;
             iss.name = 'iss';
             iss.scale.set(0.05, 0.05, 0.05);
-            iss.position.set(0,0,0);
+            iss.position.set(0, 0, 0);
             scene.add(iss);
         },
         function (xhr) {
@@ -87,21 +90,21 @@ function loadISS(scene) {
     return scene;
 }
 
-function calcIssPosition(iss, lat, lng){
+function calcIssPosition(iss, lat, lng) {
     const radius = 5;
-    var phi = (lat >= 0 ? 90 - lat: 90 + Math.abs(lat));                        
-    var theta = (lng >= 0 ? lng : 360 - Math.abs(lng));                           
+    var phi = (lat >= 0 ? 90 - lat : 90 + Math.abs(lat));
+    var theta = (lng >= 0 ? lng : 360 - Math.abs(lng));
 
     //convert phi and theta to radian measure 
-    var rad_phi = (phi / 360) * 2*Math.PI;
-    var rad_theta = (theta / 360) * 2*Math.PI;
-    var newPos = new THREE.Vector3().setFromSphericalCoords(radius,rad_phi,rad_theta);
+    var rad_phi = (phi / 360) * 2 * Math.PI;
+    var rad_theta = (theta / 360) * 2 * Math.PI;
+    var newPos = new THREE.Vector3().setFromSphericalCoords(radius, rad_phi, rad_theta);
 
-    iss.position.set(newPos.x, newPos.y, newPos.z); 
-  
+    iss.position.set(newPos.x, newPos.y, newPos.z);
+
 }
 
-function showTime(index){
+function showTime(index) {
     let output = new Date(positions[index].timestamp).toLocaleDateString("en-US");
     output += " ";
     output += new Date(positions[index].timestamp).toLocaleTimeString();
@@ -134,12 +137,10 @@ var render = function () {
         var iss = scene.getObjectByName("iss");
         let latitude = positions[indexOfPos].latitude;
         let longitude = positions[indexOfPos].longitude;
-        calcIssPosition(iss,latitude,longitude);
+        calcIssPosition(iss, latitude, longitude);
         displayTime.innerHTML = showTime(indexOfPos);
-        displayCoords.innerHTML = ConvertDEGToDMS(latitude,true) + " , " + ConvertDEGToDMS(longitude,false);
+        displayCoords.innerHTML = ConvertDEGToDMS(latitude, true) + " , " + ConvertDEGToDMS(longitude, false);
     }
     renderer.render(scene, camera);
 }
 render();
-
-
